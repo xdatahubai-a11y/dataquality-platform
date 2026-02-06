@@ -32,3 +32,4 @@ Thumbs.db
 htmlcov/
 .coverage
 test_dataquality.db
+test_data/

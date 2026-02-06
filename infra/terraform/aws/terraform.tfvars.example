@@ -1,0 +1,5 @@
+region          = "us-east-1"
+environment     = "test"
+db_password     = "CHANGE_ME_secure_password_123"
+instance_class  = "db.t3.micro"
+container_image = ""

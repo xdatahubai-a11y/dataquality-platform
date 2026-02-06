@@ -1,0 +1,5 @@
+location        = "eastus"
+environment     = "test"
+db_password     = "CHANGE_ME_secure_password_123"
+sku_name        = "B_Standard_B1ms"
+container_image = ""
