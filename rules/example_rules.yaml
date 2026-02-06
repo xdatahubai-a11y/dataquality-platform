@@ -1,0 +1,70 @@
+# Example DQ Rules Configuration
+# DataQuality Platform - Rule Definition Schema
+
+source: customer_data
+description: "Data quality rules for customer dataset"
+
+checks:
+  - name: customer_email_completeness
+    dimension: completeness
+    column: email
+    operator: gte
+    threshold: 95.0
+    severity: critical
+    config:
+      treat_empty_as_null: true
+
+  - name: customer_id_uniqueness
+    dimension: uniqueness
+    column: customer_id
+    operator: gte
+    threshold: 100.0
+    severity: critical
+
+  - name: customer_email_validity
+    dimension: validity
+    column: email
+    operator: gte
+    threshold: 90.0
+    severity: warning
+    config:
+      format: email
+
+  - name: customer_age_accuracy
+    dimension: accuracy
+    column: age
+    operator: gte
+    threshold: 95.0
+    severity: warning
+    config:
+      min_value: 0
+      max_value: 150
+
+  - name: customer_status_validity
+    dimension: validity
+    column: status
+    operator: gte
+    threshold: 100.0
+    severity: critical
+    config:
+      allowed_values: ["active", "inactive", "suspended", "deleted"]
+
+  - name: date_consistency
+    dimension: consistency
+    column: created_at
+    operator: gte
+    threshold: 100.0
+    severity: warning
+    config:
+      column_a: created_at
+      column_b: updated_at
+      operator: lte
+
+  - name: data_freshness
+    dimension: timeliness
+    column: updated_at
+    operator: gte
+    threshold: 80.0
+    severity: warning
+    config:
+      max_age_hours: 48

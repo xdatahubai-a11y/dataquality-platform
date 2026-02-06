@@ -1,0 +1,107 @@
+{
+  "summary": "Comprehensive research on the data quality tool landscape, standards, and technical approaches for building an enterprise DQ platform targeting Azure/Spark environments.",
+  "findings": {
+    "competitors": [
+      {
+        "name": "Great Expectations",
+        "description": "Open-source Python library for data validation, documentation, and profiling. Uses 'Expectations' as declarative assertions on data.",
+        "strengths": ["Large community", "Extensive expectation library (300+)", "Good docs", "Cloud-agnostic", "Data Docs for reporting"],
+        "weaknesses": ["Complex setup", "Steep learning curve", "No built-in scheduling", "No native UI for rule management", "Performance issues at scale without Spark integration"],
+        "pricing": "Open-source (GX Cloud has paid tiers starting ~$5k/mo)"
+      },
+      {
+        "name": "Soda",
+        "description": "Data quality platform with SodaCL (YAML-based checks language) and Soda Cloud for monitoring.",
+        "strengths": ["Simple YAML syntax (SodaCL)", "Good CI/CD integration", "Soda Cloud dashboard", "Multi-database support", "Anomaly detection"],
+        "weaknesses": ["Limited Spark support", "Cloud version required for full features", "No custom dimension extensibility", "Limited rule engine flexibility"],
+        "pricing": "Open-source core; Soda Cloud from $10k/yr"
+      },
+      {
+        "name": "Deequ (AWS)",
+        "description": "AWS/Spark-native DQ library built on top of Apache Spark, developed by Amazon.",
+        "strengths": ["Native Spark integration", "Constraint suggestion", "Metrics computation at scale", "Anomaly detection", "Incremental metrics"],
+        "weaknesses": ["AWS-centric", "Scala/JVM only", "No UI", "No rule management", "Limited to Spark workloads", "Sparse documentation"],
+        "pricing": "Open-source (Apache 2.0)"
+      },
+      {
+        "name": "Monte Carlo",
+        "description": "Data observability platform focused on automated monitoring, lineage, and incident management.",
+        "strengths": ["Automated anomaly detection", "Data lineage", "Incident management", "Low-code setup", "Broad integrations"],
+        "weaknesses": ["Expensive", "Black-box ML models", "No custom rule engine", "Limited DQ dimension coverage", "No Spark job execution"],
+        "pricing": "Enterprise pricing ~$50k-200k/yr"
+      },
+      {
+        "name": "Atlan",
+        "description": "Data catalog and governance platform with DQ features as part of broader data management.",
+        "strengths": ["Unified catalog + DQ", "Collaboration features", "Lineage", "Good UX"],
+        "weaknesses": ["DQ is secondary feature", "Expensive", "No deep dimension analysis", "No Spark execution"],
+        "pricing": "Enterprise pricing ~$36k+/yr"
+      },
+      {
+        "name": "Collibra DQ (formerly Owl DQ)",
+        "description": "Enterprise data quality platform acquired by Collibra, focuses on automated DQ scoring and profiling.",
+        "strengths": ["Automated profiling", "DQ scoring", "Spark support", "Enterprise governance integration"],
+        "weaknesses": ["Very expensive", "Complex deployment", "Vendor lock-in", "Heavy Java stack", "Slow innovation post-acquisition"],
+        "pricing": "Enterprise pricing $100k+/yr"
+      }
+    ],
+    "standards": [
+      "ISO 25012 - Data Quality Model: 15 characteristics including accuracy, completeness, consistency, credibility, currentness, accessibility, compliance, confidentiality, efficiency, precision, traceability, understandability, availability, portability, recoverability",
+      "DAMA DMBOK - Six core dimensions: Completeness, Uniqueness, Accuracy, Consistency, Timeliness, Validity",
+      "ISO 8000 - Data quality management standards for master data and exchange",
+      "DCAM (EDM Council) - Data Management Capability Assessment Model with DQ components"
+    ],
+    "technicalFeasibility": {
+      "assessment": "Highly feasible. All required components have mature open-source libraries. PySpark provides scalable DQ computation. FastAPI is production-ready. Azure SDKs are well-documented. React dashboard frameworks are mature.",
+      "risks": [
+        "Spark job management complexity — need robust error handling and retry logic",
+        "ADLS Gen2 authentication complexity with Managed Identity + Service Principal",
+        "Delta Lake version compatibility across Spark versions",
+        "SQL Server connectivity from containerized environments",
+        "Dashboard real-time updates for long-running Spark jobs"
+      ],
+      "mitigations": [
+        "Use Spark submit with structured error handling; implement job state machine",
+        "Abstract authentication into connector layer; support multiple auth methods",
+        "Pin Delta Lake version and test compatibility matrix",
+        "Use Azure Private Endpoints and connection pooling",
+        "WebSocket or SSE for job status updates; polling fallback"
+      ]
+    },
+    "gaps": [
+      "No tool combines configurable rule engine + Spark execution + Azure-native deployment in one package",
+      "Most tools lack YAML-based rule definition WITH custom Python rule extensibility",
+      "No open-source tool provides DQ scoring with historical trending dashboards out of the box",
+      "Limited support for Delta Lake and Lakehouse table profiling in existing tools",
+      "No tool offers both scheduled and event-triggered DQ checks with dependency chains",
+      "Poor support for DQ dimension weighting and composite scoring",
+      "Most tools don't support rule versioning and audit trails",
+      "Lack of Azure-native deployment patterns (Container Apps, Managed Identity)"
+    ]
+  },
+  "recommendations": [
+    "Build a Python-first platform leveraging FastAPI + PySpark for the best Spark ecosystem alignment",
+    "Use YAML-based rule definitions (inspired by SodaCL) with Python extensibility (inspired by Great Expectations)",
+    "Implement all 6 DAMA DMBOK dimensions as pluggable calculators",
+    "Use PostgreSQL for metadata/rules/history — reliable, well-supported, good JSON support",
+    "React + TypeScript dashboard with Recharts for DQ visualization",
+    "Azure Container Apps for deployment — simpler than AKS for this workload",
+    "Redis for job queue — simpler than Service Bus, sufficient for MVP",
+    "Implement connector abstraction layer for data sources — start with ADLS Gen2, Delta, SQL Server"
+  ],
+  "decisions": [
+    {"topic": "Rule Engine Pattern", "decision": "Hybrid YAML + Python", "rationale": "YAML for declarative rules (80% use case), Python for custom logic (20% power user). Covers both Data Steward and Data Engineer personas."},
+    {"topic": "Backend Framework", "decision": "FastAPI", "rationale": "Async-first, auto OpenAPI docs, Pydantic integration, Python ecosystem alignment with PySpark."},
+    {"topic": "Dashboard Framework", "decision": "React + TypeScript + Recharts", "rationale": "Mature ecosystem, good charting libraries, TypeScript for type safety, large talent pool."},
+    {"topic": "Database", "decision": "PostgreSQL", "rationale": "Reliable, JSON support for flexible rule storage, good SQLAlchemy support, Azure Database for PostgreSQL available."},
+    {"topic": "Deployment Target", "decision": "Azure Container Apps", "rationale": "Simpler than AKS, built-in scaling, revision management, cheaper for this workload pattern."},
+    {"topic": "Spark Execution", "decision": "PySpark with local/cluster submit", "rationale": "Python-first aligns with FastAPI backend. Support both local mode (dev) and cluster submit (prod via Synapse/Databricks)."}
+  ],
+  "nextSteps": [
+    "Define detailed user stories and acceptance criteria",
+    "Design API schema and database models",
+    "Define YAML rule schema specification",
+    "Create project scaffold and CI/CD pipeline",
+    "Implement MVP: rule engine + 6 dimensions + ADLS connector + basic dashboard"
+  ]
+}

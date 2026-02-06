@@ -1,0 +1,105 @@
+{
+  "summary": "Product requirements for DataQuality Platform — an enterprise DQ tool with configurable rule engine, Spark-based profiling, Azure-native deployment, and interactive dashboard. MVP focuses on core dimensions, rule CRUD, ADLS/Delta/SQL connectors, and metrics dashboard.",
+  "personas": [
+    {"name": "Data Engineer", "role": "Builds and maintains data pipelines, configures DQ rules programmatically, monitors job execution", "needs": ["YAML/Python rule authoring", "Spark job monitoring", "API access for CI/CD integration", "Data source connection management", "Historical run comparison"]},
+    {"name": "Data Steward", "role": "Defines business DQ rules, monitors data quality scores, investigates DQ issues", "needs": ["Dashboard with DQ scores and trends", "Rule configuration UI", "Drill-down into failed checks", "Alerting on DQ degradation", "Export DQ reports"]},
+    {"name": "Platform Admin", "role": "Manages deployment, security, scheduling, and system configuration", "needs": ["Deployment automation", "Managed Identity configuration", "Schedule management", "User access control", "System health monitoring"]}
+  ],
+  "epics": [
+    {
+      "name": "DQ Dimensions",
+      "stories": [
+        {"title": "Completeness Check", "description": "As a Data Engineer, I want to check column completeness (null/missing ratio) so that I can ensure required fields are populated.", "acceptanceCriteria": ["Calculate null percentage per column", "Support threshold configuration", "Return pass/fail with score 0-100", "Handle nested/complex types"], "priority": "must"},
+        {"title": "Uniqueness Check", "description": "As a Data Engineer, I want to verify uniqueness of columns/column combinations so that I can detect duplicates.", "acceptanceCriteria": ["Calculate distinct ratio per column", "Support composite key uniqueness", "Return duplicate count and percentage", "Identify duplicate rows"], "priority": "must"},
+        {"title": "Accuracy Check", "description": "As a Data Steward, I want to validate data accuracy against reference data or patterns so that I can ensure correctness.", "acceptanceCriteria": ["Support regex pattern validation", "Support reference dataset comparison", "Support value range checks", "Return accuracy percentage"], "priority": "must"},
+        {"title": "Consistency Check", "description": "As a Data Engineer, I want to check cross-column and cross-dataset consistency so that I can ensure data alignment.", "acceptanceCriteria": ["Support cross-column rules (e.g., start_date < end_date)", "Support cross-dataset referential integrity", "Return inconsistency count and details"], "priority": "must"},
+        {"title": "Timeliness Check", "description": "As a Data Steward, I want to check data freshness so that I can ensure data is up-to-date.", "acceptanceCriteria": ["Check max timestamp against threshold", "Support configurable freshness SLA", "Return freshness age and pass/fail", "Support multiple timestamp formats"], "priority": "must"},
+        {"title": "Validity Check", "description": "As a Data Engineer, I want to validate data against schema and business rules so that I can ensure conformity.", "acceptanceCriteria": ["Support type validation", "Support enum/allowed values", "Support format validation (email, phone, etc.)", "Return validity percentage per rule"], "priority": "must"}
+      ]
+    },
+    {
+      "name": "Rule Engine",
+      "stories": [
+        {"title": "Create DQ Rule", "description": "As a Data Engineer, I want to create DQ rules via API so that I can define quality checks.", "acceptanceCriteria": ["POST /api/rules creates a rule", "Validate rule schema", "Support YAML and JSON rule definitions", "Return created rule with ID"], "priority": "must"},
+        {"title": "YAML Rule Configuration", "description": "As a Data Engineer, I want to define rules in YAML files so that I can version-control my DQ checks.", "acceptanceCriteria": ["Parse YAML rule files", "Support all 6 dimensions in YAML", "Validate YAML against schema", "Import YAML via API"], "priority": "must"},
+        {"title": "List and Filter Rules", "description": "As a Data Steward, I want to view and filter rules so that I can manage my DQ checks.", "acceptanceCriteria": ["GET /api/rules with pagination", "Filter by dimension, source, status", "Sort by name, created date", "Return rule count"], "priority": "must"},
+        {"title": "Update and Delete Rules", "description": "As a Data Engineer, I want to update and delete rules so that I can maintain my rule set.", "acceptanceCriteria": ["PUT /api/rules/{id} updates rule", "DELETE /api/rules/{id} soft-deletes", "Maintain rule version history"], "priority": "must"},
+        {"title": "SQL-Based Rules", "description": "As a Data Engineer, I want to define DQ rules using SQL so that I can leverage complex logic.", "acceptanceCriteria": ["Support custom SQL expressions", "Execute SQL against data source", "Return query results as DQ metrics"], "priority": "should"},
+        {"title": "Custom Python Rules", "description": "As a Data Engineer, I want to write custom Python functions as DQ rules for complex validations.", "acceptanceCriteria": ["Support Python function registration", "Safe execution sandbox", "Access to DataFrame API"], "priority": "could"}
+      ]
+    },
+    {
+      "name": "Data Sources",
+      "stories": [
+        {"title": "ADLS Gen2 Connection", "description": "As a Data Engineer, I want to connect to ADLS Gen2 storage so that I can profile files and datasets.", "acceptanceCriteria": ["Support connection string and Managed Identity auth", "List containers and paths", "Read Parquet, CSV, JSON files", "Test connection endpoint"], "priority": "must"},
+        {"title": "Delta Table Connection", "description": "As a Data Engineer, I want to connect to Delta tables so that I can profile lakehouse data.", "acceptanceCriteria": ["Read Delta tables via path or catalog", "Support time travel queries", "Handle schema evolution", "Support partitioned tables"], "priority": "must"},
+        {"title": "SQL Server Connection", "description": "As a Data Engineer, I want to connect to SQL Server so that I can profile relational data.", "acceptanceCriteria": ["Support SQL auth and AAD auth", "List schemas and tables", "Read table data via JDBC", "Test connection endpoint"], "priority": "must"},
+        {"title": "Connection Management", "description": "As a Platform Admin, I want to manage data source connections with secure credential storage.", "acceptanceCriteria": ["CRUD for data sources", "Encrypted credential storage", "Connection health checks", "Support Azure Key Vault references"], "priority": "must"}
+      ]
+    },
+    {
+      "name": "Spark Jobs",
+      "stories": [
+        {"title": "Submit DQ Job", "description": "As a Data Engineer, I want to submit a DQ profiling job so that I can execute checks at scale.", "acceptanceCriteria": ["POST /api/jobs submits job", "Select rules and data source", "Return job ID for tracking", "Support job parameters"], "priority": "must"},
+        {"title": "Monitor Job Status", "description": "As a Data Engineer, I want to monitor job execution so that I know when checks complete.", "acceptanceCriteria": ["GET /api/jobs/{id} returns status", "States: pending, running, completed, failed", "Return progress percentage", "Return error details on failure"], "priority": "must"},
+        {"title": "Job History", "description": "As a Data Steward, I want to view job execution history so that I can track DQ over time.", "acceptanceCriteria": ["GET /api/jobs with date filters", "Show duration, status, rule count", "Link to DQ results", "Pagination support"], "priority": "must"},
+        {"title": "Retry Failed Job", "description": "As a Data Engineer, I want to retry failed jobs so that I can recover from transient failures.", "acceptanceCriteria": ["POST /api/jobs/{id}/retry resubmits", "Preserve original parameters", "Track retry count"], "priority": "should"}
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "stories": [
+        {"title": "Metrics Overview", "description": "As a Data Steward, I want a dashboard showing overall DQ scores so that I can assess data health at a glance.", "acceptanceCriteria": ["Show composite DQ score", "Show per-dimension scores", "Show trend over last 30 days", "Color-coded health indicators"], "priority": "must"},
+        {"title": "Rule Configuration UI", "description": "As a Data Steward, I want to create and edit rules in the UI so that I don't need to write YAML.", "acceptanceCriteria": ["Form-based rule creation", "Dimension selector", "Threshold configuration", "Rule preview/test"], "priority": "should"},
+        {"title": "Historical Run View", "description": "As a Data Steward, I want to see historical DQ runs with drill-down so that I can investigate issues.", "acceptanceCriteria": ["List past runs with status", "Click to see run details", "Show per-rule results", "Compare runs side by side"], "priority": "must"},
+        {"title": "Score Cards", "description": "As a Data Steward, I want score cards per data source showing DQ health.", "acceptanceCriteria": ["Card per data source", "Show last run score", "Show dimension breakdown", "Click for details"], "priority": "must"}
+      ]
+    },
+    {
+      "name": "Scheduling",
+      "stories": [
+        {"title": "Cron-Based Schedule", "description": "As a Data Engineer, I want to schedule DQ checks on a cron schedule.", "acceptanceCriteria": ["Create schedule with cron expression", "Link to rules and data source", "Enable/disable schedule", "Show next run time"], "priority": "should"},
+        {"title": "Event-Triggered Checks", "description": "As a Data Engineer, I want DQ checks triggered by data arrival events.", "acceptanceCriteria": ["Webhook endpoint for triggers", "Support Azure Event Grid events", "Execute linked rules on trigger"], "priority": "could"}
+      ]
+    },
+    {
+      "name": "Deployment",
+      "stories": [
+        {"title": "Container Deployment", "description": "As a Platform Admin, I want to deploy the platform to Azure Container Apps.", "acceptanceCriteria": ["Dockerfile for API and dashboard", "Docker Compose for local dev", "Bicep template for Azure deployment", "Health check endpoints"], "priority": "must"},
+        {"title": "Managed Identity Integration", "description": "As a Platform Admin, I want the platform to use Managed Identity for Azure resource access.", "acceptanceCriteria": ["Support DefaultAzureCredential", "No secrets in config for Azure resources", "Key Vault integration for external secrets"], "priority": "should"}
+      ]
+    }
+  ],
+  "mvpScope": [
+    "All 6 DQ dimension calculators",
+    "Rule CRUD API with YAML support",
+    "ADLS Gen2, Delta Table, SQL Server connectors",
+    "Spark job submission and monitoring",
+    "Dashboard: metrics overview, history, score cards",
+    "Docker-based deployment",
+    "PostgreSQL for metadata storage"
+  ],
+  "futurePhases": [
+    "Phase 2: Scheduling engine (cron + event-triggered)",
+    "Phase 2: Custom Python rules with sandbox execution",
+    "Phase 2: SQL-based rules",
+    "Phase 2: Alerting and notifications (email, Teams, Slack)",
+    "Phase 3: Data lineage integration",
+    "Phase 3: Anomaly detection (ML-based)",
+    "Phase 3: Multi-tenant support",
+    "Phase 3: Role-based access control",
+    "Phase 4: Data catalog integration (Purview)",
+    "Phase 4: Real-time streaming DQ checks"
+  ],
+  "decisions": [
+    {"topic": "MVP Scope", "decision": "Focus on core 6 dimensions + rule CRUD + 3 connectors + dashboard", "rationale": "Delivers immediate value while keeping scope manageable for initial release"},
+    {"topic": "Scheduling", "decision": "Defer to Phase 2", "rationale": "Manual/API-triggered jobs sufficient for MVP; scheduling adds complexity"},
+    {"topic": "Custom Python Rules", "decision": "Defer to Phase 2", "rationale": "YAML rules cover 80% of use cases; Python extensibility requires sandbox security work"}
+  ],
+  "nextSteps": [
+    "Architect to design system architecture and database schema",
+    "Define YAML rule specification format",
+    "Design API contract (OpenAPI spec)",
+    "Create project scaffold"
+  ]
+}

@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      DQ_DATABASE_URL: postgresql://dq:dqpass@postgres:5432/dataquality
+      DQ_DEBUG: "false"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: dataquality
+      POSTGRES_USER: dq
+      POSTGRES_PASSWORD: dqpass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
