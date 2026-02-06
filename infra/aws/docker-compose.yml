@@ -3,25 +3,19 @@ version: "3.8"
 services:
   api:
     build:
-      context: ..
-      dockerfile: infra/Dockerfile.api
+      context: ../..
+      dockerfile: infra/aws/Dockerfile.api
     ports:
       - "8000:8000"
     environment:
       DQ_DATABASE_URL: postgresql://dq:dqpass@postgres:5432/dataquality
-      DQ_DEBUG: "false"
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
     depends_on:
       - postgres
-    restart: unless-stopped
-
-  dashboard:
-    build:
-      context: ..
-      dockerfile: infra/Dockerfile.dashboard
-    ports:
-      - "3000:80"
-    depends_on:
-      - api
+      - localstack
     restart: unless-stopped
 
   postgres:
@@ -36,19 +30,17 @@ services:
       - "5432:5432"
     restart: unless-stopped
 
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: dataquality
-      MYSQL_USER: dq
-      MYSQL_PASSWORD: dqpass
-    volumes:
-      - mysqldata:/var/lib/mysql
+  localstack:
+    image: localstack/localstack:latest
     ports:
-      - "3306:3306"
+      - "4566:4566"
+    environment:
+      SERVICES: s3,glue,redshift
+      DEFAULT_REGION: us-east-1
+    volumes:
+      - localstack_data:/var/lib/localstack
     restart: unless-stopped
 
 volumes:
   pgdata:
-  mysqldata:
+  localstack_data:

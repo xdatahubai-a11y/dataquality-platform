@@ -47,7 +47,7 @@ class DataSource(Base):
 
     id: str = Column(String(36), primary_key=True, default=gen_uuid)
     name: str = Column(String(255), nullable=False)
-    type: str = Column(String(50), nullable=False)  # adls_gen2, delta_table, sql_server
+    type: str = Column(String(50), nullable=False)  # adls_gen2, delta_table, sql_server, postgresql, mysql, s3, redshift, glue_catalog
     connection_config: str = Column(Text, nullable=False)  # JSON string
     is_active: bool = Column(Boolean, default=True)
     last_tested_at: datetime = Column(DateTime, nullable=True)

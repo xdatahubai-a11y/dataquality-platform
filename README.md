@@ -11,11 +11,14 @@ Enterprise data quality platform with configurable rule engine, Spark-based prof
 
 - **6 DQ Dimensions**: Completeness, Uniqueness, Accuracy, Consistency, Timeliness, Validity
 - **Rule Engine**: YAML-based declarative rules with configurable thresholds and operators
-- **Data Sources**: ADLS Gen2, Delta Tables, SQL Server
+- **Data Sources**:
+  - **Azure**: ADLS Gen2, Delta Tables, SQL Server
+  - **AWS**: S3, Redshift, Glue Data Catalog
+  - **Databases**: PostgreSQL, MySQL
 - **Spark Jobs**: PySpark-based large-scale DQ profiling
 - **REST API**: Full CRUD for rules, sources, jobs, and metrics (auto-generated OpenAPI docs)
 - **Dashboard**: React/TypeScript UI with score cards, dimension charts, and run history
-- **Azure Deployment**: Container Apps, Key Vault, Managed Identity (Bicep templates)
+- **Cloud Deployment**: Azure (Container Apps, Bicep) and AWS (ECS Fargate, CloudFormation)
 
 ## Quick Start
 
@@ -46,7 +49,7 @@ docker-compose up --build
 ```
 api/          — FastAPI backend (routers, models, schemas)
 engine/       — DQ rule engine + dimension calculators
-connectors/   — Data source connectors (ADLS Gen2, Delta, SQL Server)
+connectors/   — Data source connectors (ADLS Gen2, Delta, SQL Server, PostgreSQL, MySQL, S3, Redshift, Glue)
 spark/        — Spark job definitions and submission
 dashboard/    — React/TypeScript frontend
 infra/        — Docker, Nginx, Azure Bicep deployment

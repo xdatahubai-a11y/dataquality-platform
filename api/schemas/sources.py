@@ -10,7 +10,7 @@ class SourceCreate(BaseModel):
     """Schema for creating a data source."""
 
     name: str = Field(..., min_length=1, max_length=255)
-    type: str = Field(..., pattern="^(adls_gen2|delta_table|sql_server)$")
+    type: str = Field(..., pattern="^(adls_gen2|delta_table|sql_server|postgresql|mysql|s3|redshift|glue_catalog)$")
     connection_config: dict
 
 
@@ -18,7 +18,7 @@ class SourceUpdate(BaseModel):
     """Schema for updating a data source."""
 
     name: Optional[str] = Field(None, min_length=1, max_length=255)
-    type: Optional[str] = Field(None, pattern="^(adls_gen2|delta_table|sql_server)$")
+    type: Optional[str] = Field(None, pattern="^(adls_gen2|delta_table|sql_server|postgresql|mysql|s3|redshift|glue_catalog)$")
     connection_config: Optional[dict] = None
     is_active: Optional[bool] = None
 

@@ -1,0 +1,63 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: dataquality-api
+  ECS_CLUSTER: dataquality-production
+  ECS_SERVICE: dataquality-api
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f infra/aws/Dockerfile.api .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f infra/aws/Dockerfile.api .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Run tests
+        run: |
+          pip install -r requirements.txt
+          python -m pytest tests/ -v
+
+      - name: Update ECS task definition
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          sed -i "s|<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/dataquality-api:latest|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" infra/aws/ecs-task-definition.json
+          sed -i "s|<REGION>|$AWS_REGION|g" infra/aws/ecs-task-definition.json
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: infra/aws/ecs-task-definition.json
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
