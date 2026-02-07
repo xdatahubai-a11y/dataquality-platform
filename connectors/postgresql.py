@@ -8,9 +8,10 @@ from connectors.base import DataConnector
 class PostgreSQLConnector(DataConnector):
     """Connector for PostgreSQL via psycopg2."""
 
-    def __init__(self) -> None:
+    def __init__(self, batch_size: int = 10000) -> None:
         self._connection = None
         self._schema: str = "public"
+        self.batch_size: int = batch_size
 
     def connect(self, config: dict) -> None:
         """Connect to PostgreSQL.
@@ -72,10 +73,41 @@ class PostgreSQLConnector(DataConnector):
 
         cursor.execute(query)
         col_names = [desc[0] for desc in cursor.description]
-        rows = cursor.fetchall()
+        results: list[dict] = []
+        while True:
+            batch = cursor.fetchmany(self.batch_size)
+            if not batch:
+                break
+            results.extend({col_names[i]: row[i] for i in range(len(col_names))} for row in batch)
         cursor.close()
+        return results
 
-        return [{col_names[i]: row[i] for i in range(len(col_names))} for row in rows]
+    def read_data_iterator(
+        self, path: str, limit: Optional[int] = None, columns: Optional[list[str]] = None
+    ):
+        """Yield batches of rows as lists of dicts (generator)."""
+        if not self._connection:
+            raise RuntimeError("Not connected. Call connect() first.")
+
+        cursor = self._connection.cursor()
+        if path.startswith("sql:"):
+            query = path[4:]
+        else:
+            cols = ", ".join(columns) if columns else "*"
+            query = f"SELECT {cols} FROM {self._schema}.{path}"
+            if limit:
+                query += f" LIMIT {limit}"
+
+        cursor.execute(query)
+        col_names = [desc[0] for desc in cursor.description]
+        try:
+            while True:
+                batch = cursor.fetchmany(self.batch_size)
+                if not batch:
+                    break
+                yield [{col_names[i]: row[i] for i in range(len(col_names))} for row in batch]
+        finally:
+            cursor.close()
 
     def list_tables(self) -> list[str]:
         """List tables in the connected database schema."""

@@ -12,9 +12,10 @@ from connectors.base import DataConnector
 class SQLiteConnector(DataConnector):
     """SQLite connector following the DataConnector interface."""
 
-    def __init__(self) -> None:
+    def __init__(self, batch_size: int = 10000) -> None:
         self._conn: Optional[sqlite3.Connection] = None
         self._db_path: str = ""
+        self.batch_size: int = batch_size
 
     def connect(self, config: dict) -> None:
         """Connect to a SQLite database file.
@@ -59,7 +60,36 @@ class SQLiteConnector(DataConnector):
 
         cursor = self._conn.execute(query)
         col_names = [desc[0] for desc in cursor.description]
-        return [dict(zip(col_names, row)) for row in cursor.fetchall()]
+        results: list[dict] = []
+        while True:
+            batch = cursor.fetchmany(self.batch_size)
+            if not batch:
+                break
+            results.extend(dict(zip(col_names, row)) for row in batch)
+        return results
+
+    def read_data_iterator(
+        self, path: str, limit: Optional[int] = None, columns: Optional[list[str]] = None
+    ):
+        """Yield batches of rows as lists of dicts (generator).
+
+        Each yielded item is a list[dict] of up to batch_size rows.
+        """
+        if not self._conn:
+            raise RuntimeError("Not connected. Call connect() first.")
+
+        cols = ", ".join(columns) if columns else "*"
+        query = f"SELECT {cols} FROM {path}"  # noqa: S608
+        if limit:
+            query += f" LIMIT {limit}"
+
+        cursor = self._conn.execute(query)
+        col_names = [desc[0] for desc in cursor.description]
+        while True:
+            batch = cursor.fetchmany(self.batch_size)
+            if not batch:
+                break
+            yield [dict(zip(col_names, row)) for row in batch]
 
     def list_tables(self) -> list[str]:
         """List all tables in the SQLite database."""
