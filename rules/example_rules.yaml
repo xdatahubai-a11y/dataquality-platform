@@ -68,3 +68,15 @@ checks:
     severity: warning
     config:
       max_age_hours: 48
+
+  - name: profile_user_email
+    dimension: profiling
+    column: email
+    threshold: 70
+    severity: info
+
+  - name: profile_user_age
+    dimension: profiling
+    column: age
+    threshold: 60
+    severity: info

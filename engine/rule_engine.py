@@ -11,6 +11,7 @@ from engine.dimensions.completeness import CompletenessCalculator
 from engine.dimensions.consistency import ConsistencyCalculator
 from engine.dimensions.timeliness import TimelinessCalculator
 from engine.dimensions.uniqueness import UniquenessCalculator
+from engine.dimensions.profiling import ProfilingCalculator
 from engine.dimensions.validity import ValidityCalculator
 
 
@@ -47,6 +48,7 @@ DIMENSION_CALCULATORS = {
     "consistency": ConsistencyCalculator(),
     "timeliness": TimelinessCalculator(),
     "validity": ValidityCalculator(),
+    "profiling": ProfilingCalculator(),
 }
 
 
@@ -116,6 +118,8 @@ def evaluate_rule(rule: RuleDefinition, data: Any) -> DQCheckResult:
         elif op == "lt":
             passed = metric_value < rule.threshold
 
+    details = getattr(calculator, "_last_details", {})
+
     return DQCheckResult(
         rule_name=rule.name,
         dimension=rule.dimension,
@@ -123,6 +127,7 @@ def evaluate_rule(rule: RuleDefinition, data: Any) -> DQCheckResult:
         metric_value=round(metric_value, 4),
         threshold=rule.threshold,
         passed=passed,
+        details=details,
     )
 
 
