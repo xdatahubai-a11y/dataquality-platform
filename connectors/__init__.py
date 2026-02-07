@@ -2,6 +2,7 @@
 
 from connectors.adls_gen2 import ADLSGen2Connector
 from connectors.base import DataConnector
+from connectors.bigquery import BigQueryConnector
 from connectors.delta_table import DeltaTableConnector
 from connectors.glue_catalog import GlueCatalogConnector
 from connectors.mysql import MySQLConnector
@@ -13,6 +14,7 @@ from connectors.sql_server import SQLServerConnector
 __all__ = [
     "DataConnector",
     "ADLSGen2Connector",
+    "BigQueryConnector",
     "DeltaTableConnector",
     "GlueCatalogConnector",
     "MySQLConnector",
