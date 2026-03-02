@@ -1,7 +1,6 @@
 """Endpoints for DQ job submission and monitoring."""
 
 import json
-from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query

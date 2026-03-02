@@ -71,8 +71,8 @@ class TestConsistency:
 
 class TestTimeliness:
     def test_fresh_data(self):
-        from datetime import datetime, timedelta
-        now = datetime.utcnow()
+        from datetime import datetime, timedelta, timezone
+        now = datetime.now(timezone.utc)
         data = [
             {"ts": (now - timedelta(hours=1)).isoformat()},
             {"ts": (now - timedelta(hours=2)).isoformat()},

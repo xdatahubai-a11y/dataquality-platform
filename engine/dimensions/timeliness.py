@@ -3,8 +3,8 @@
 Checks how recent the data is relative to a freshness threshold.
 """
 
-from datetime import datetime, timedelta
-from typing import Any, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 
 class TimelinessCalculator:
@@ -26,7 +26,7 @@ class TimelinessCalculator:
         cfg = config or {}
         max_age_hours = cfg.get("max_age_hours", 24)
         ref_time_str = cfg.get("reference_time")
-        ref_time = datetime.fromisoformat(ref_time_str) if ref_time_str else datetime.utcnow()
+        ref_time = datetime.fromisoformat(ref_time_str) if ref_time_str else datetime.now(timezone.utc)
         threshold = timedelta(hours=max_age_hours)
 
         total = len(data)

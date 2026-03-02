@@ -1,7 +1,6 @@
 """HTML section builders for the data quality report."""
 
 from datetime import datetime
-from typing import Any
 
 
 def _score_color(score: float) -> str:

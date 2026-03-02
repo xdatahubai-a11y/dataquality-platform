@@ -1,7 +1,7 @@
 """Abstract base class for data source connectors."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Optional
 
 
 class DataConnector(ABC):

@@ -65,7 +65,7 @@ class TestBigQueryConnector:
         mock_result.__iter__ = MagicMock(return_value=iter([dict_row]))
         connector._client.query.return_value.result.return_value = mock_result
 
-        result = connector.read_data("users", limit=10, columns=["name", "age"])
+        connector.read_data("users", limit=10, columns=["name", "age"])
         call_args = connector._client.query.call_args[0][0]
         assert "name, age" in call_args
         assert "LIMIT 10" in call_args

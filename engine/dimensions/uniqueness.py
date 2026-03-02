@@ -3,7 +3,7 @@
 Measures the percentage of unique (non-duplicate) values in a column.
 """
 
-from typing import Any, Optional
+from typing import Optional
 
 
 class UniquenessCalculator:

@@ -1,6 +1,5 @@
 """Shared test fixtures for DataQuality Platform tests."""
 
-import json
 import os
 import sys
 

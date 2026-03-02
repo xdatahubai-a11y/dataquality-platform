@@ -4,7 +4,7 @@ Validates data accuracy via regex patterns, value ranges, or reference lookups.
 """
 
 import re
-from typing import Any, Optional
+from typing import Optional
 
 
 class AccuracyCalculator:

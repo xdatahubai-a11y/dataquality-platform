@@ -4,7 +4,7 @@ Validates data against schema constraints, types, and format rules.
 """
 
 import re
-from typing import Any, Optional
+from typing import Optional
 
 BUILTIN_FORMATS = {
     "email": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
