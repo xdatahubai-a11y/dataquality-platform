@@ -3,7 +3,7 @@
 Checks cross-column relationships and referential integrity.
 """
 
-from typing import Any, Optional
+from typing import Optional
 
 
 class ConsistencyCalculator:

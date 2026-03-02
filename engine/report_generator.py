@@ -4,7 +4,6 @@ Produces a self-contained HTML file with inline CSS — no external dependencies
 """
 
 from datetime import datetime
-from typing import Any
 
 from engine.report_sections import (
     build_dimension_breakdown,

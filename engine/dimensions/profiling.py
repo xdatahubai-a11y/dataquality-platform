@@ -4,7 +4,7 @@ Computes column statistics and returns a data quality readiness score.
 """
 
 from collections import Counter
-from typing import Any, Optional
+from typing import Optional
 
 
 class ProfilingCalculator:

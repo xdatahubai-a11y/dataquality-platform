@@ -3,7 +3,7 @@
 Measures the percentage of non-null/non-empty values in a column.
 """
 
-from typing import Any, Optional
+from typing import Optional
 
 
 class CompletenessCalculator:

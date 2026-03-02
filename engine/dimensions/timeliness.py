@@ -4,7 +4,7 @@ Checks how recent the data is relative to a freshness threshold.
 """
 
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Optional
 
 
 class TimelinessCalculator:

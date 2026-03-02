@@ -1,7 +1,6 @@
 """Tests for data source connectors (mocked)."""
 
 import pytest
-from unittest.mock import MagicMock, patch
 
 from connectors.base import DataConnector
 from connectors.adls_gen2 import ADLSGen2Connector

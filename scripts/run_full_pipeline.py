@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from connectors.sqlite import SQLiteConnector
 from engine.report_generator import generate_html_report
 from engine.report_uploader import save_report_local
-from engine.rule_engine import DQCheckResult, RuleDefinition, run_checks
+from engine.rule_engine import RuleDefinition, run_checks
 from scripts.create_test_db import create_database
 
 REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"

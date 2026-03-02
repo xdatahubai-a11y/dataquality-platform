@@ -8,7 +8,6 @@ writes results back.
 import json
 import sys
 from datetime import datetime, timezone
-from typing import Any
 
 
 def run_dq_checks(job_config: dict) -> dict:

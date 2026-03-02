@@ -8,7 +8,6 @@ Produces CSV and Parquet files for testing DQ rule evaluation:
 - corrupted.csv: Severely degraded (everything fails)
 """
 
-import os
 import random
 import string
 from datetime import datetime, timedelta
