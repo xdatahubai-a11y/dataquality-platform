@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from api.dependencies import get_db
 from api.models.database import DataSource, gen_uuid
 from api.schemas.sources import SourceCreate, SourceListResponse, SourceResponse, SourceUpdate
+from connectors import get_connector
 
 router = APIRouter(prefix="/api/sources", tags=["sources"])
 
@@ -85,5 +86,33 @@ def test_connection(source_id: str, db: Session = Depends(get_db)) -> dict:
     source = db.query(DataSource).filter(DataSource.id == source_id).first()
     if not source:
         raise HTTPException(status_code=404, detail="Data source not found")
-    # TODO: Implement actual connection testing via connectors
-    return {"status": "ok", "message": f"Connection test for {source.name} not yet implemented"}
+
+    try:
+        # Get the appropriate connector class
+        connector_class = get_connector(source.type)
+
+        # Create connector instance
+        connector = connector_class()
+
+        # Parse connection config from JSON string
+        connection_config = json.loads(source.connection_config) if isinstance(source.connection_config, str) else source.connection_config
+
+        # Try to connect and test
+        connector.connect(connection_config)
+        is_connected = connector.test_connection()
+
+        # Clean up connection if the connector has a close method
+        if hasattr(connector, 'close'):
+            connector.close()
+
+        if is_connected:
+            return {"success": True, "message": f"Successfully connected to {source.name}"}
+        else:
+            return {"success": False, "error": f"Failed to establish connection to {source.name}"}
+
+    except ValueError as e:
+        # Unsupported source type
+        return {"success": False, "error": str(e)}
+    except Exception as e:
+        # Connection or other errors
+        return {"success": False, "error": f"Connection failed: {str(e)}"}
