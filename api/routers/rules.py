@@ -62,13 +62,35 @@ def get_rule(rule_id: str, db: Session = Depends(get_db)) -> Rule:
     return rule
 
 
+def _validate_threshold_for_dimension(threshold: float, dimension: str) -> None:
+    """Validate threshold range based on dimension type."""
+    if dimension in {'completeness', 'uniqueness', 'validity'}:
+        if not (0 <= threshold <= 100):
+            raise HTTPException(
+                status_code=422,
+                detail=[{
+                    "type": "value_error",
+                    "loc": ["body", "threshold"],
+                    "msg": f"threshold for {dimension} dimension must be between 0 and 100",
+                    "input": threshold
+                }]
+            )
+
+
 @router.put("/{rule_id}", response_model=RuleResponse)
 def update_rule(rule_id: str, update: RuleUpdate, db: Session = Depends(get_db)) -> Rule:
     """Update an existing rule."""
     rule = db.query(Rule).filter(Rule.id == rule_id).first()
     if not rule:
         raise HTTPException(status_code=404, detail="Rule not found")
+
     update_data = update.model_dump(exclude_unset=True)
+
+    # Validate threshold against dimension (existing or updated)
+    if "threshold" in update_data and update_data["threshold"] is not None:
+        dimension = update_data.get("dimension", rule.dimension)
+        _validate_threshold_for_dimension(update_data["threshold"], dimension)
+
     if "config" in update_data and update_data["config"] is not None:
         update_data["config"] = json.dumps(update_data["config"])
     for field, value in update_data.items():
