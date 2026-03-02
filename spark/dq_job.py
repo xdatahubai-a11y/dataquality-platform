@@ -7,7 +7,7 @@ writes results back.
 
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -59,7 +59,7 @@ def run_dq_checks(job_config: dict) -> dict:
             }
             for r in results
         ],
-        "completed_at": datetime.utcnow().isoformat(),
+        "completed_at": datetime.now(timezone.utc).isoformat(),
     }
 
     return summary

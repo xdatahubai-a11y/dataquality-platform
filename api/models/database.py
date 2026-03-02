@@ -1,7 +1,7 @@
 """SQLAlchemy ORM models for the DataQuality Platform."""
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, relationship
@@ -33,8 +33,8 @@ class Rule(Base):
     config: str = Column(Text, nullable=True)  # JSON string for extra config
     severity: str = Column(String(20), default="warning")
     is_active: bool = Column(Boolean, default=True)
-    created_at: datetime = Column(DateTime, default=datetime.utcnow)
-    updated_at: datetime = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: datetime = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     source = relationship("DataSource", back_populates="rules")
     results = relationship("DQResult", back_populates="rule")
@@ -51,8 +51,8 @@ class DataSource(Base):
     connection_config: str = Column(Text, nullable=False)  # JSON string
     is_active: bool = Column(Boolean, default=True)
     last_tested_at: datetime = Column(DateTime, nullable=True)
-    created_at: datetime = Column(DateTime, default=datetime.utcnow)
-    updated_at: datetime = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: datetime = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     rules = relationship("Rule", back_populates="source")
     runs = relationship("DQRun", back_populates="source")
@@ -94,7 +94,7 @@ class DQResult(Base):
     threshold: float = Column(Float, nullable=True)
     passed: bool = Column(Boolean)
     details: str = Column(Text, nullable=True)  # JSON
-    created_at: datetime = Column(DateTime, default=datetime.utcnow)
+    created_at: datetime = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     run = relationship("DQRun", back_populates="results")
     rule = relationship("Rule", back_populates="results")
@@ -112,7 +112,7 @@ class DQScore(Base):
     score: float = Column(Float, nullable=False)
     total_checks: int = Column(Integer, default=0)
     passed_checks: int = Column(Integer, default=0)
-    created_at: datetime = Column(DateTime, default=datetime.utcnow)
+    created_at: datetime = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     run = relationship("DQRun", back_populates="scores")
     source = relationship("DataSource", back_populates="scores")
@@ -131,4 +131,4 @@ class Schedule(Base):
     is_active: bool = Column(Boolean, default=True)
     last_run_at: datetime = Column(DateTime, nullable=True)
     next_run_at: datetime = Column(DateTime, nullable=True)
-    created_at: datetime = Column(DateTime, default=datetime.utcnow)
+    created_at: datetime = Column(DateTime, default=lambda: datetime.now(timezone.utc))
