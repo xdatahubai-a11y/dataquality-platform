@@ -8,6 +8,24 @@ agents:
   default:
     agent: claude
     model: claude-sonnet-4-20250514
+
+  rules:
+    - match:
+        type: feature
+        complexity: large
+      agent: claude
+      model: claude-sonnet-4-20250514
+
+    - match:
+        type: bugfix
+        complexity: small
+      agent: claude
+      model: claude-sonnet-4-20250514
+
+    - match:
+        type: feature
+      agent: claude
+      model: claude-sonnet-4-20250514
 quality_gate:
   ci:
     required: true
@@ -15,8 +33,21 @@ quality_gate:
       - "build-dashboard"
       - "deploy"
       - test-api
-  reviewers: []
-  min_reviews_pass: 0
+  reviewers:
+    enabled: true
+    agent: claude
+    model: claude-sonnet-4-20250514
+    personas:
+      - name: security
+        label: "Security & Correctness"
+        template: review-security.md
+      - name: architecture
+        label: "Architecture & Design"
+        template: review-architecture.md
+      - name: testing
+        label: "Testing & Edge Cases"
+        template: review-testing.md
+  min_reviews_pass: 2
 monitor:
   interval: 10m
   max_attempts: 3
