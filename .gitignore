@@ -33,3 +33,7 @@ htmlcov/
 .coverage
 test_dataquality.db
 test_data/
+.swarm/active-tasks.json
+.swarm/prompts/
+.swarm/metrics/
+.swarm/logs/

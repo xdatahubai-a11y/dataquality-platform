@@ -1,0 +1,27 @@
+project:
+  name: "dataquality-platform"
+  repo: "xdatahubai-a11y/dataquality-platform"
+  language: python
+  package_manager: pip
+  setup_command: "python3 -m venv .venv 2>/dev/null; .venv/bin/pip install -q fastapi uvicorn sqlalchemy pydantic pydantic-settings pyyaml httpx pytest pytest-asyncio alembic"
+agents:
+  default:
+    agent: claude
+    model: claude-sonnet-4-20250514
+quality_gate:
+  ci:
+    required: true
+    ignore_checks:
+      - "build-dashboard"
+      - "deploy"
+      - test-api
+  reviewers: []
+  min_reviews_pass: 0
+monitor:
+  interval: 10m
+  max_attempts: 3
+  stall_timeout_min: 15
+worktrees:
+  base_dir: "../worktrees"
+  base_branch: "origin/main"
+  cleanup_after_merge: true
