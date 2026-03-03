@@ -38,8 +38,8 @@ def create_rule(rule: RuleCreate, db: Session = Depends(get_db)) -> Rule:
 def list_rules(
     dimension: Optional[str] = None,
     is_active: Optional[bool] = None,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
     db: Session = Depends(get_db),
 ) -> dict:
     """List rules with optional filtering."""
@@ -49,8 +49,8 @@ def list_rules(
     if is_active is not None:
         query = query.filter(Rule.is_active == is_active)
     total = query.count()
-    items = query.offset((page - 1) * page_size).limit(page_size).all()
-    return {"items": items, "total": total, "page": page, "page_size": page_size}
+    items = query.offset(skip).limit(limit).all()
+    return {"items": items, "total": total, "skip": skip, "limit": limit}
 
 
 @router.get("/{rule_id}", response_model=RuleResponse)

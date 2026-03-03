@@ -43,6 +43,8 @@ def test_list_rules():
     data = resp.json()
     assert data["total"] == 2
     assert len(data["items"]) == 2
+    assert data["skip"] == 0
+    assert data["limit"] == 50
 
 
 def test_get_rule():
@@ -81,6 +83,107 @@ def test_filter_by_dimension():
     client.post("/api/rules", json={"name": "r2", "dimension": "uniqueness"})
     resp = client.get("/api/rules?dimension=completeness")
     assert resp.json()["total"] == 1
+
+
+def test_pagination_with_skip_and_limit():
+    """Test pagination using skip and limit parameters."""
+    # Create 5 rules
+    for i in range(5):
+        client.post("/api/rules", json={"name": f"rule_{i}", "dimension": "completeness"})
+
+    # Test default pagination
+    resp = client.get("/api/rules")
+    data = resp.json()
+    assert data["total"] == 5
+    assert len(data["items"]) == 5
+    assert data["skip"] == 0
+    assert data["limit"] == 50
+
+    # Test with limit=2
+    resp = client.get("/api/rules?limit=2")
+    data = resp.json()
+    assert data["total"] == 5
+    assert len(data["items"]) == 2
+    assert data["skip"] == 0
+    assert data["limit"] == 2
+
+    # Test with skip=2, limit=2 (should get items 2-3)
+    resp = client.get("/api/rules?skip=2&limit=2")
+    data = resp.json()
+    assert data["total"] == 5
+    assert len(data["items"]) == 2
+    assert data["skip"] == 2
+    assert data["limit"] == 2
+
+    # Test with skip=4, limit=2 (should get only 1 item)
+    resp = client.get("/api/rules?skip=4&limit=2")
+    data = resp.json()
+    assert data["total"] == 5
+    assert len(data["items"]) == 1
+    assert data["skip"] == 4
+    assert data["limit"] == 2
+
+
+def test_pagination_empty_result():
+    """Test pagination when skip is beyond available items."""
+    # Create 2 rules
+    client.post("/api/rules", json={"name": "r1", "dimension": "completeness"})
+    client.post("/api/rules", json={"name": "r2", "dimension": "uniqueness"})
+
+    # Skip beyond available items
+    resp = client.get("/api/rules?skip=10")
+    data = resp.json()
+    assert data["total"] == 2
+    assert len(data["items"]) == 0
+    assert data["skip"] == 10
+    assert data["limit"] == 50
+
+
+def test_pagination_with_filters():
+    """Test pagination combined with filters."""
+    # Create rules with different dimensions
+    for i in range(3):
+        client.post("/api/rules", json={"name": f"comp_{i}", "dimension": "completeness"})
+    for i in range(2):
+        client.post("/api/rules", json={"name": f"uniq_{i}", "dimension": "uniqueness"})
+
+    # Filter by dimension with pagination
+    resp = client.get("/api/rules?dimension=completeness&limit=2")
+    data = resp.json()
+    assert data["total"] == 3
+    assert len(data["items"]) == 2
+    assert data["skip"] == 0
+    assert data["limit"] == 2
+
+    # Get remaining completeness rules
+    resp = client.get("/api/rules?dimension=completeness&skip=2&limit=2")
+    data = resp.json()
+    assert data["total"] == 3
+    assert len(data["items"]) == 1
+    assert data["skip"] == 2
+    assert data["limit"] == 2
+
+
+def test_pagination_boundary_validation():
+    """Test validation of skip and limit parameters."""
+    # Test negative skip
+    resp = client.get("/api/rules?skip=-1")
+    assert resp.status_code == 422
+
+    # Test zero limit
+    resp = client.get("/api/rules?limit=0")
+    assert resp.status_code == 422
+
+    # Test limit above maximum
+    resp = client.get("/api/rules?limit=101")
+    assert resp.status_code == 422
+
+    # Test valid boundary values
+    resp = client.get("/api/rules?skip=0&limit=1")
+    assert resp.status_code == 200
+
+    resp = client.get("/api/rules?skip=0&limit=100")
+    assert resp.status_code == 200
 
 
 # Validation tests
