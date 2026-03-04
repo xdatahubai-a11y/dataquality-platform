@@ -111,5 +111,5 @@ class RuleListResponse(BaseModel):
 
     items: list[RuleResponse]
     total: int
-    page: int
-    page_size: int
+    skip: int
+    limit: int
